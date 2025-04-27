@@ -28,9 +28,12 @@ def webhook():
 
 import os
 
+import os
+
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 10000))  # ←環境変数PORTを読む！
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
     
