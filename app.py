@@ -1,4 +1,9 @@
-app.rout("/webhook", methods=["POST"])
+from flask import Flask, request, jsonify
+import openai
+
+app = Flask(__name__)
+
+app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
     
