@@ -6,6 +6,9 @@ app = Flask(__name__)
 
 # ここにあなたのOpenAI APIキーをセット
 openai.api_key = "あなたのOpenAI APIキー"
+@app.route("/", methods=["GET"])
+def index():
+    return "Hello, this is NowTalk Bot!"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
