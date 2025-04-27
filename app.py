@@ -4,34 +4,45 @@ import os
 
 app = Flask(__name__)
 
-# ここにあなたのOpenAI APIキーをセット
+# OpenAI APIキーをセット
 openai.api_key = "あなたのOpenAI APIキー"
-@app.route("/", methods=["GET"])
-def index():
-    return "Hello, this is NowTalk Bot!"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json()
-    user_message = data["events"][0]["message"]["text"]
+    try:
+        data = request.get_json()
 
-    prompt = f"""あなたはプロの英語トレーナーです。
+        # イベントがあるかチェック
+        if "events" in data:
+            user_message = data["events"][0]["message"]["text"]
+
+            # GPTに送るプロンプト
+            prompt = f"""
+あなたはプロの英語トレーナーです。
 この日本語を2パターンの英語に翻訳してください。
 1. 日常英会話バージョン
 2. ビジネス英語版
 日本語: {user_message}
 """
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}]
+            )
 
-    reply_text = response["choices"][0]["message"]["content"]
+            reply_text = response["choices"][0]["message"]["content"]
 
-    return jsonify({"reply": reply_text})
+            # LINE側に正しく返す（重要）
+            return jsonify({"reply": reply_text})
 
-# ⭐️⭐️⭐️ここを必ず入れる！！⭐️⭐️⭐️
+        else:
+            return "No events", 400
+
+    except Exception as e:
+        print(f"エラー: {e}")
+        return "Error", 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
