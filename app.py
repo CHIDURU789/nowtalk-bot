@@ -25,7 +25,9 @@ def webhook():
             "Content-Type": "application/json",
         }
         payload = {
-            "inputs": {"text": user_message}
+    "query": user_message
+}
+
         }
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=headers, json=payload)
 
@@ -33,7 +35,8 @@ def webhook():
         if dify_response.status_code == 200:
             dify_reply_text = dify_response.json().get("answer", "すみません、うまく返事できませんでした。")
         else:
-            dify_reply_text = "Difyエラーが発生しました。"
+    dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
+
 
         # ③ LINEに返信
         headers = {
