@@ -1,4 +1,4 @@
-@app.route("/webhook", methods=["POST"])
+app.rout("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
     
