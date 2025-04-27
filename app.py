@@ -1,38 +1,55 @@
 from flask import Flask, request, jsonify
-import openai
+import requests
 import os
 
 app = Flask(__name__)
+
+# 必要な環境変数（Renderなら環境に登録してもOK）
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
+DIFY_API_KEY = app-ZyZtMTuYuPgJW1soMU4ymbtN
+DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
 
-    if "events" in data and len(data["events"]) > 0 and "message" in data["events"][0] and "text" in data["events"][0]["message"]:
+    if "events" in data and len(data["events"]) > 0 and "message" in data["events"][0]:
         user_message = data["events"][0]["message"]["text"]
+        reply_token = data["events"][0]["replyToken"]
 
-        prompt = f"""
-あなたはプロの英語トレーナーです。
-この日本語を2パターンの英語に翻訳してください。
-1. 日常英会話バージョン
-2. ビジネス英語版
-日本語: {user_message}
-"""
+        # ① Difyにメッセージ送信
+        headers = {
+            "Authorization": f"Bearer {DIFY_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "inputs": {"text": user_message}
+        }
+        dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=headers, json=payload)
 
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
+        # ② Difyの返答を取得
+        if dify_response.status_code == 200:
+            dify_reply_text = dify_response.json().get("answer", "すみません、うまく返事できませんでした。")
+        else:
+            dify_reply_text = "Difyエラーが発生しました。"
 
-        reply_text = response.choices[0].message.content
-        return jsonify({"reply": reply_text})
-    
-    else:
-        return "ok"
+        # ③ LINEに返信
+        headers = {
+            "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "replyToken": reply_token,
+            "messages": [{
+                "type": "text",
+                "text": dify_reply_text
+            }]
+        }
+        requests.post(LINE_REPLY_ENDPOINT, headers=headers, json=body)
+
+    return "ok"
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    LINE_CHANNEL_ACCESS_TOKEN 
