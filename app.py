@@ -25,9 +25,8 @@ def webhook():
             "Content-Type": "application/json",
         }
         payload = {
-    "query": user_message}
-
-        }
+    "query": user_message
+}
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=headers, json=payload)
 
         # ② Difyの返答を取得
