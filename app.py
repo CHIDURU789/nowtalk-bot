@@ -4,20 +4,19 @@ import os
 
 app = Flask(__name__)
 
-# OpenAI APIキーをセット
+# あなたのOpenAI APIキー
 openai.api_key = "あなたのOpenAI APIキー"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    try:
-        data = request.get_json()
+    data = request.get_json()
 
-        # イベントがあるかチェック
-        if "events" in data:
-            user_message = data["events"][0]["message"]["text"]
+    if "events" not in data:
+        return "ok"  # ここで必ず200 OK返す！
 
-            # GPTに送るプロンプト
-            prompt = f"""
+    user_message = data["events"][0]["message"]["text"]
+
+    prompt = f"""
 あなたはプロの英語トレーナーです。
 この日本語を2パターンの英語に翻訳してください。
 1. 日常英会話バージョン
@@ -25,24 +24,20 @@ def webhook():
 日本語: {user_message}
 """
 
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}]
-            )
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
 
-            reply_text = response["choices"][0]["message"]["content"]
+    reply_text = response["choices"][0]["message"]["content"]
 
-            # LINE側に正しく返す（重要）
-            return jsonify({"reply": reply_text})
-
-        else:
-            return "No events", 400
-
-    except Exception as e:
-        print(f"エラー: {e}")
-        return "Error", 500
+    # 返信用のJSON
+    return jsonify({
+        "reply": reply_text
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
