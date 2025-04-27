@@ -14,8 +14,8 @@ def webhook():
 
     prompt = f"""あなたはプロの英語トレーナーです。
 この日本語を2パターンの英語に翻訳してください。
-1.日常英会話バージョン
-2.ビジネス英語版
+1. 日常英会話バージョン
+2. ビジネス英語版
 日本語: {user_message}
 """
 
@@ -28,7 +28,7 @@ def webhook():
 
     return jsonify({"reply": reply_text})
 
-# ⭐⭐⭐ここを必ず入れる！！⭐⭐⭐
+# ⭐️⭐️⭐️ここを必ず入れる！！⭐️⭐️⭐️
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
