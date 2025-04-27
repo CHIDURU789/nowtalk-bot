@@ -7,7 +7,8 @@ app = Flask(__name__)
 # 必要な環境変数（Renderなら環境に登録してもOK）
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
-DIFY_API_KEY = app-ZyZtMTuYuPgJW1soMU4ymbtN
+DIFY_API_KEY = "app-ZYzTMtuYuPgJW1soMU4ymbtN"  
+
 DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
 
 @app.route("/webhook", methods=["POST"])
