@@ -1,3 +1,8 @@
+from flask import Flask, request
+import os
+import requests
+
+app = Flask(__name__)  # ⭐️ここが必要！！
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
