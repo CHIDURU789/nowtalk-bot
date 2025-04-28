@@ -2,12 +2,12 @@ import os
 import requests
 from flask import Flask, request
 
+app = Flask(__name__)
+
 DIFY_API_KEY = os.getenv("DIFY_API_KEY")
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
 LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
-
-app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -18,7 +18,7 @@ def webhook():
         reply_token = data["events"][0]["replyToken"]
         user_id = data["events"][0]["source"]["userId"]
 
-        # Difyにメッセージ送信
+        # Difyへメッセージ送信
         dify_headers = {
             "Authorization": f"Bearer {DIFY_API_KEY}",
             "Content-Type": "application/json",
@@ -29,9 +29,10 @@ def webhook():
             },
             "user": user_id
         }
+
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
-        # Difyの返信を取得
+        # Difyの返答を取得
         if dify_response.status_code == 200:
             dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
         else:
@@ -44,16 +45,15 @@ def webhook():
         }
         body = {
             "replyToken": reply_token,
-            "messages": [
-                {
-                    "type": "text",
-                    "text": dify_reply_text
-                }
-            ]
+            "messages": [{
+                "type": "text",
+                "text": dify_reply_text,
+            }]
         }
+
         requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
 
-    return "OK", 200
+    return "OK"
 
-if __name__ == "__main__":
-    app.run()
+       
+  
