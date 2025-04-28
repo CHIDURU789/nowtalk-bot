@@ -21,10 +21,8 @@ def webhook():
             "Authorization": f"Bearer {DIFY_API_KEY}",
             "Content-Type": "application/json",
         }
-        payload = {
-    "inputs": {
-        "query": user_message
-    },
+           payload = {
+    "query": user_message,  
     "user": user_id
 }
 
