@@ -1,3 +1,9 @@
+import os
+
+DIFY_API_KEY = os.getenv("DIFY_API_KEY")
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+
+
 from flask import Flask, request
 import os
 import requests
