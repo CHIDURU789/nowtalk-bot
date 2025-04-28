@@ -28,8 +28,7 @@ def webhook():
 dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
 
-
-　　　　 if dify_response.status_code == 200:
+if dify_response.status_code == 200:
     dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
 else:
     dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
