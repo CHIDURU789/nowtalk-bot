@@ -5,8 +5,8 @@ from flask import Flask, request
 app = Flask(__name__)
 
 DIFY_API_KEY = os.getenv("DIFY_API_KEY")
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
 
 @app.route("/webhook", methods=["POST"])
@@ -18,29 +18,29 @@ def webhook():
         reply_token = data["events"][0]["replyToken"]
         user_id = data["events"][0]["source"]["userId"]
 
-        # ここ大事！Difyに送るJSONデータ
+        # Difyへメッセージ送信
+        dify_headers = {
+            "Authorization": f"Bearer {DIFY_API_KEY}",
+            "Content-Type": "application/json",
+        }
         payload = {
             "inputs": {
                 "query": user_message
             },
             "user": user_id
         }
+        dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
-        headers = {
-            "Authorization": f"Bearer {DIFY_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=headers, json=payload)
-
+        # Difyの応答を取得
         if dify_response.status_code == 200:
             dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
         else:
             dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
 
+        # LINEに返信
         line_headers = {
             "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         body = {
             "replyToken": reply_token,
@@ -55,3 +55,4 @@ def webhook():
 
 if __name__ == "__main__":
     app.run(port=5000)
+
