@@ -19,13 +19,19 @@ def webhook():
         reply_token = data["events"][0]["replyToken"]
 
         # ① Difyへメッセージ送信
-        dify_headers = {
-            "Authorization": f"Bearer {DIFY_API_KEY}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "query": user_message
-        }
+      dify_headers = {
+    "Authorization": f"Bearer {DIFY_API_KEY}",
+    "Content-Type": "application/json",
+}
+payload = {
+    "inputs": {
+        "query": user_message
+    },
+    "user": reply_token
+}
+
+
+
 
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
