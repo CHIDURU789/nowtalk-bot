@@ -33,17 +33,16 @@ if dify_response.status_code == 200:
 else:
     dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
 
-        # ③ LINEに返信
-        line_headers = {
-            "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
-            "Content-Type": "application/json",
-        }
-        body = {
-            "replyToken": reply_token,
-            "messages": [{
-                "type": "text",
-                "text": dify_reply_text
-            }]
-        }
-        requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
+line_headers = {  # ←ここは if/else と同じ高さ！（1段戻す）
+    "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
+    "Content-Type": "application/json",
+}
+body = {
+    "replyToken": reply_token,
+    "messages": [{
+        "type": "text",
+        "text": dify_reply_text
+    }]
+}
+requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
 
