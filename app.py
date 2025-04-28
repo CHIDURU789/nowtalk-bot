@@ -4,6 +4,7 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+# 環境変数からAPIキーなどを取得
 DIFY_API_KEY = os.getenv("DIFY_API_KEY")
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
@@ -23,13 +24,13 @@ def webhook():
             "Authorization": f"Bearer {DIFY_API_KEY}",
             "Content-Type": "application/json",
         }
-        payload = {
-   　　　　　 "inputs": {
-     　　   "query": user_message
- 　　　　　　　　   },
-   　　 "user": user_id
-　　　　　　　　　　　}
 
+        payload = {
+            "inputs": {
+                "query": user_message
+            },
+            "user": user_id
+        }
 
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
@@ -39,16 +40,17 @@ def webhook():
         else:
             dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
 
-        # LINEに返信
+        # LINEに返答
         line_headers = {
             "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
             "Content-Type": "application/json",
         }
+
         body = {
             "replyToken": reply_token,
             "messages": [{
                 "type": "text",
-                "text": dify_reply_text,
+                "text": dify_reply_text
             }]
         }
 
@@ -56,5 +58,5 @@ def webhook():
 
     return "OK"
 
-       
-  
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
