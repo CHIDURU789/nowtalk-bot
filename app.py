@@ -24,7 +24,7 @@ def webhook():
             "Content-Type": "application/json",
         }
         payload = {
-            "inputs": {   # ← ここちゃんと inputs にしてる！
+            "inputs": {
                 "query": user_message
             },
             "user": user_id
