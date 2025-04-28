@@ -1,15 +1,3 @@
-from flask import Flask, request
-import requests
-import os
-
-app = Flask(__name__)
-
-# 環境変数からAPIキーなどを取得
-DIFY_API_KEY = os.getenv("DIFY_API_KEY")
-DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"  # Difyのエンドポイント（たぶん固定）
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
-
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
@@ -17,21 +5,19 @@ def webhook():
     if "events" in data and len(data["events"]) > 0 and "message" in data["events"][0]:
         user_message = data["events"][0]["message"]["text"]
         reply_token = data["events"][0]["replyToken"]
+        user_id = data["events"][0]["source"]["userId"]  # ⭐️ここ！
 
         # ① Difyへメッセージ送信
-      dify_headers = {
-    "Authorization": f"Bearer {DIFY_API_KEY}",
-    "Content-Type": "application/json",
-}
-payload = {
-    "inputs": {
-        "query": user_message
-    },
-    "user": reply_token
-}
-
-
-
+        dify_headers = {
+            "Authorization": f"Bearer {DIFY_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "inputs": {
+                "query": user_message
+            },
+            "user": user_id  # ⭐️ここ！
+        }
 
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
@@ -41,7 +27,7 @@ payload = {
         else:
             dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
 
-        # ③ LINEへ返信
+        # ③ LINEに返信
         line_headers = {
             "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
             "Content-Type": "application/json",
@@ -53,12 +39,5 @@ payload = {
                 "text": dify_reply_text
             }]
         }
-
         requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
-
-    return "OK"
-
-
-       
-
 
