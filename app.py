@@ -6,7 +6,9 @@ DIFY_API_KEY = os.getenv("DIFY_API_KEY")
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
 LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
-app = Flask(__name__)  # ⭐️ここが必要！！
+
+app = Flask(__name__)
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
@@ -14,35 +16,40 @@ def webhook():
     if "events" in data and len(data["events"]) > 0 and "message" in data["events"][0]:
         user_message = data["events"][0]["message"]["text"]
         reply_token = data["events"][0]["replyToken"]
-        user_id = data["events"][0]["source"]["userId"]  # ⭐️ここ！
+        user_id = data["events"][0]["source"]["userId"]
 
-        # ① Difyへメッセージ送信
+        # Difyへメッセージ送信
         dify_headers = {
             "Authorization": f"Bearer {DIFY_API_KEY}",
             "Content-Type": "application/json",
         }
         payload = {
-    "query": user_message,
-    "user": user_id
-}
-dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
+            "query": user_message,
+            "user": user_id,
+        }
+        dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
+        # Difyの返答を取得
+        if dify_response.status_code == 200:
+            dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
+        else:
+            dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
 
-if dify_response.status_code == 200:
-    dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
-else:
-    dify_reply_text = f"Difyエラーが発生しました: {dify_response.text}"
+        # LINEに返信
+        line_headers = {
+            "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "replyToken": reply_token,
+            "messages": [
+                {
+                    "type": "text",
+                    "text": dify_reply_text,
+                }
+            ]
+        }
+        requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
 
-line_headers = {  # ←ここは if/else と同じ高さ！（1段戻す）
-    "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
-    "Content-Type": "application/json",
-}
-body = {
-    "replyToken": reply_token,
-    "messages": [{
-        "type": "text",
-        "text": dify_reply_text
-    }]
-}
-requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
+    return "OK"
 
