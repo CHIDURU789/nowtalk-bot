@@ -1,13 +1,11 @@
 import os
+import requests
+from flask import Flask, request
 
 DIFY_API_KEY = os.getenv("DIFY_API_KEY")
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-
-
-from flask import Flask, request
-import os
-import requests
-
+DIFY_CHAT_ENDPOINT = "https://api.dify.ai/v1/chat-messages"
+LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply"
 app = Flask(__name__)  # ⭐️ここが必要！！
 @app.route("/webhook", methods=["POST"])
 def webhook():
