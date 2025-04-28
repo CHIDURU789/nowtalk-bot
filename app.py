@@ -18,18 +18,20 @@ def webhook():
         reply_token = data["events"][0]["replyToken"]
         user_id = data["events"][0]["source"]["userId"]
 
-        # Difyへメッセージ送信
+        # Difyにメッセージ送信
         dify_headers = {
             "Authorization": f"Bearer {DIFY_API_KEY}",
             "Content-Type": "application/json",
         }
         payload = {
-            "query": user_message,
-            "user": user_id,
+            "inputs": {   # ← ここちゃんと inputs にしてる！
+                "query": user_message
+            },
+            "user": user_id
         }
         dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
-        # Difyの返答を取得
+        # Difyの返信を取得
         if dify_response.status_code == 200:
             dify_reply_text = dify_response.json().get("answer", "すみません、うまく返答できませんでした。")
         else:
@@ -45,11 +47,13 @@ def webhook():
             "messages": [
                 {
                     "type": "text",
-                    "text": dify_reply_text,
+                    "text": dify_reply_text
                 }
             ]
         }
         requests.post(LINE_REPLY_ENDPOINT, headers=line_headers, json=body)
 
-    return "OK"
+    return "OK", 200
 
+if __name__ == "__main__":
+    app.run()
