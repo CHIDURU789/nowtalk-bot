@@ -32,8 +32,9 @@ def webhook():
             "user": user_id
         }
 
-        dify_response = print(payload)
-　　　　　　　　requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
+        print(payload)  # ← 単に表示だけしたいならこれだけでOK
+        dify_response = requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
+
 
         # Difyのレスポンスを処理
         if dify_response.status_code == 200:
