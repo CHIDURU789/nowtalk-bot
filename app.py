@@ -33,7 +33,7 @@ def webhook():
         }
 
         dify_response = print(payload)
-requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
+　　　　　　　　requests.post(DIFY_CHAT_ENDPOINT, headers=dify_headers, json=payload)
 
         # Difyのレスポンスを処理
         if dify_response.status_code == 200:
